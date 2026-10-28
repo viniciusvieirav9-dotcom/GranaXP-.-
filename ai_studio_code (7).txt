@@ -1,0 +1,40 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Settings } from 'lucide-react'
+import { AdminModal } from './AdminModal'
+
+export function Footer() {
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false)
+
+  return (
+    <footer className="border-t border-brand-border bg-brand-dark/95 py-6 px-4 text-sm text-brand-muted">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p className="font-semibold text-white">GranaXP</p>
+          <p className="text-xs">Sua grana. Seu jogo. Seu próximo nível.</p>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <Link href="/privacidade" className="hover:text-brand-lime transition-colors">
+            Privacidade & LGPD
+          </Link>
+          
+          {/* Botão sutil de engrenagem */}
+          <button
+            onClick={() => setIsAdminModalOpen(true)}
+            aria-label="Acesso Administrativo"
+            className="p-1.5 rounded-full hover:bg-brand-card hover:text-brand-lime transition-all"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {isAdminModalOpen && (
+        <AdminModal onClose={() => setIsAdminModalOpen(false)} />
+      )}
+    </footer>
+  )
+}

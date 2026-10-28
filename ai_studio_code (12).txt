@@ -1,0 +1,91 @@
+import { redirect } from 'next/navigation'
+import { getSession } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { Shield, Users, ArrowUpDown, Target } from 'lucide-react'
+
+export default async function AdminPage() {
+  const session = await getSession()
+
+  // Se não houver cookie autenticado de admin, redireciona para a raiz
+  if (!session || session.role !== 'ADMIN') {
+    redirect('/')
+  }
+
+  const [usersCount, txCount, goalsCount, recentUsers] = await Promise.all([
+    prisma.user.count(),
+    prisma.transaction.count(),
+    prisma.goal.count(),
+    prisma.user.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, username: true, displayName: true, xp: true, createdAt: true }
+    })
+  ])
+
+  return (
+    <div className="min-h-screen bg-brand-dark text-white p-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center justify-between pb-6 mb-6 border-b border-brand-border">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-brand-lime/10 text-brand-lime">
+              <Shield className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Painel do Administrador</h1>
+              <p className="text-xs text-brand-muted">Estatísticas gerais do ecossistema GranaXP</p>
+            </div>
+          </div>
+          <a
+            href="/"
+            className="text-xs border border-brand-border px-3 py-2 rounded-xl hover:bg-brand-card transition"
+          >
+            Voltar ao Início
+          </a>
+        </div>
+
+        {/* Cards de Métricas */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <div className="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center gap-4">
+            <Users className="w-8 h-8 text-brand-lime" />
+            <div>
+              <span className="text-xs text-brand-muted">Usuários Totais</span>
+              <p className="text-2xl font-black">{usersCount}</p>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center gap-4">
+            <ArrowUpDown className="w-8 h-8 text-brand-neon" />
+            <div>
+              <span className="text-xs text-brand-muted">Movimentações</span>
+              <p className="text-2xl font-black">{txCount}</p>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center gap-4">
+            <Target className="w-8 h-8 text-brand-lime" />
+            <div>
+              <span className="text-xs text-brand-muted">Metas Ativas</span>
+              <p className="text-2xl font-black">{goalsCount}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Últimos Usuários */}
+        <div className="rounded-2xl border border-brand-border bg-brand-card p-6">
+          <h3 className="font-bold text-lg mb-4">Últimos Cadastros</h3>
+          <div className="divide-y divide-brand-border">
+            {recentUsers.map((u) => (
+              <div key={u.id} className="py-3 flex items-center justify-between text-sm">
+                <div>
+                  <p className="font-semibold">{u.displayName} <span className="text-xs text-brand-muted">(@{u.username})</span></p>
+                  <p className="text-[11px] text-brand-muted">{new Date(u.createdAt).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <span className="font-mono text-brand-lime text-xs">{u.xp} XP</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,95 @@
+'use client'
+
+import { useRef, useState } from 'react'
+import { Share2, Check } from 'lucide-react'
+
+interface ShareableBadgeProps {
+  displayName: string
+  level: number
+  badgeTitle: string
+  badgeDescription: string
+  badgeIcon: string
+}
+
+export function ShareableBadge({
+  displayName,
+  level,
+  badgeTitle,
+  badgeDescription,
+  badgeIcon
+}: ShareableBadgeProps) {
+  const [copied, setCopied] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  const handleShare = async () => {
+    const shareText = `🔥 Conquistei o emblema "${badgeTitle}" no Nível ${level} do GranaXP! Suba de nível você também: ${window.location.origin}`
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'GranaXP - Conquista Desbloqueada',
+          text: shareText
+        })
+      } catch {
+        // Fallback para cópia
+      }
+    } else {
+      await navigator.clipboard.writeText(shareText)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* O cartão visual limpo sem valores monetários */}
+      <div
+        ref={cardRef}
+        className="w-full rounded-2xl border border-brand-border bg-gradient-to-br from-brand-card to-black p-5 relative overflow-hidden shadow-lg"
+      >
+        <div className="absolute top-0 right-0 w-24 h-24 bg-brand-lime/10 blur-2xl rounded-full" />
+        
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[11px] font-bold tracking-wider uppercase text-brand-lime">
+            GranaXP Conquista
+          </span>
+          <span className="text-xs bg-brand-border px-2 py-0.5 rounded-full text-white font-medium">
+            Nível {level}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="text-4xl p-3 bg-brand-dark border border-brand-border rounded-xl">
+            {badgeIcon}
+          </div>
+          <div>
+            <h4 className="font-bold text-white text-base">{badgeTitle}</h4>
+            <p className="text-xs text-brand-muted">{badgeDescription}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-brand-border/50 flex justify-between items-center text-[11px] text-brand-muted">
+          <span>Jogador: <strong className="text-white">{displayName}</strong></span>
+          <span className="text-brand-lime font-mono">granaxp.vercel.app</span>
+        </div>
+      </div>
+
+      <button
+        onClick={handleShare}
+        className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-brand-border bg-brand-dark text-xs font-semibold text-white hover:border-brand-lime transition"
+      >
+        {copied ? (
+          <>
+            <Check className="w-3.5 h-3.5 text-brand-lime" />
+            Link de compartilhamento copiado!
+          </>
+        ) : (
+          <>
+            <Share2 className="w-3.5 h-3.5 text-brand-lime" />
+            Compartilhar Conquista
+          </>
+        )}
+      </button>
+    </div>
+  )
+}

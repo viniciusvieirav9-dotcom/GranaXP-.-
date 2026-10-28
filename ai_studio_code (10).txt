@@ -1,0 +1,85 @@
+'use client'
+
+import { useState } from 'react'
+import { Calculator } from 'lucide-react'
+
+export function Simulator() {
+  const [initial, setInitial] = useState(100)
+  const [monthly, setMonthly] = useState(50)
+  const [months, setMonths] = useState(12)
+  const rate = 0.008 // ~10% ao ano
+
+  // Cálculo de juros compostos
+  let totalInvested = initial
+  let finalValue = initial
+
+  for (let i = 0; i < months; i++) {
+    finalValue = (finalValue + monthly) * (1 + rate)
+    totalInvested += monthly
+  }
+
+  const interestEarned = Math.max(0, finalValue - totalInvested)
+
+  return (
+    <div className="rounded-2xl border border-brand-border bg-brand-card p-6 shadow-sm">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2.5 rounded-xl bg-brand-lime/10 text-brand-lime">
+          <Calculator className="w-5 h-5" />
+        </div>
+        <div>
+          <h3 className="font-bold text-white">Simulador de Futuro</h3>
+          <p className="text-xs text-brand-muted">Descubra quanto sua disciplina pode render</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div>
+          <label className="text-xs text-brand-muted block mb-1">Aporte Inicial (R$)</label>
+          <input
+            type="number"
+            value={initial}
+            onChange={(e) => setInitial(Number(e.target.value) || 0)}
+            className="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-white text-sm focus:border-brand-lime outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-brand-muted block mb-1">Aporte Mensal (R$)</label>
+          <input
+            type="number"
+            value={monthly}
+            onChange={(e) => setMonthly(Number(e.target.value) || 0)}
+            className="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-white text-sm focus:border-brand-lime outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-brand-muted block mb-1">Tempo ({months} meses)</label>
+          <input
+            type="range"
+            min="3"
+            max="60"
+            value={months}
+            onChange={(e) => setMonths(Number(e.target.value))}
+            className="w-full accent-brand-lime mt-2 cursor-pointer"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-brand-dark border border-brand-border">
+        <div>
+          <span className="text-xs text-brand-muted">Total Depositado:</span>
+          <p className="text-base font-semibold text-white">
+            {totalInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </p>
+        </div>
+        <div>
+          <span className="text-xs text-brand-lime">Rendimento Estimado:</span>
+          <p className="text-lg font-bold text-brand-lime">
+            +{interestEarned.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
